@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "patches": {
+    "string": {
+      "toolsanimations:patches/pickaxe.json": {
+        "1/value": "(pickaxe_animation) ? value : vanilla_item"
+      }
+    },
+    "boolean": {
+      "toolsanimations:patches/axe.json": {
+        "0/value/RenderingOffset": "not(tool_rendering_offset)",
+        "2/value/RenderingOffset": "not(tool_rendering_offset)",
+        "0/value/CanSplitLogs": "axe_can_split_logs",
+        "2/value/CanSplitLogs": "axe_can_split_logs",
+        "-/enabled": "axe_animation"
+      },
+      "toolsanimations:patches/pickaxe.json": {
+        "0/value/RenderingOffset": "not(tool_rendering_offset)"
+      }
+    },
+    "number": {
+      "toolsanimations:config/animations/axe.json": {
+        "axe-swing-forward/SoundFrames/0/Volume": "tool_whoosh_sound"
+      },
+      "toolsanimations:config/animations/pickaxe.json": {
+        "pickaxe-swing-forward-1/SoundFrames/0/Volume": "tool_whoosh_sound",
+        "pickaxe-swing-forward-2/SoundFrames/0/Volume": "tool_whoosh_sound",
+        "pickaxe-swing-forward-3/SoundFrames/0/Volume": "tool_whoosh_sound"
+      }
+    }
+  },
+  "constants": {
+    "empty_string": "",
+    "vanilla_axe": "ItemAxe",
+    "vanilla_item": "Item"
+  },
+  "settings": [
+    {
+      "code": "axe_animation",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-axe_animation",
+      "default": true
+    },
+    {
+      "code": "pickaxe_animation",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-pickaxe_animation",
+      "default": true
+    },
+    {
+      "code": "tool_rendering_offset",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-tool_rendering_offset",
+      "default": true
+    },
+    {
+      "code": "axe_can_split_logs",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-axe_can_split_logs",
+      "default": true
+    },
+    {
+      "code": "tool_whoosh_sound",
+      "type": "float",
+      "ingui": "toolsanimations:setting-tool_whoosh_sound",
+      "default": 0.5,
+      "range": {
+        "min": 0.0,
+        "max": 1.0
+      }
+    },
+    {
+      "code": "tool_animation_speed_bonus",
+      "type": "float",
+      "ingui": "toolsanimations:setting-tool_animation_speed_bonus",
+      "comment": "toolsanimations:setting-comment-tool_animation_speed_bonus",
+      "default": 0.3,
+      "range": {
+        "min": 0.0,
+        "max": 1.5
+      }
+    }
+  ]
+}

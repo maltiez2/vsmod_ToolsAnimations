@@ -1,0 +1,10 @@
+{
+  "setting-axe_animation": "New axe animations (turn off for compatibility with other mods if necessary)",
+  "setting-pickaxe_animation": "New pickaxe animations",
+  "setting-shovel_animation": "New shovel animations",
+  "setting-tool_rendering_offset": "Tools clipping through blocks",
+  "setting-axe_can_split_logs": "Axe can split logs (turn off for compatibility with other mods if necessary)",
+  "setting-tool_whoosh_sound": "Tools whoosh sound volume on swing",
+  "setting-tool_animation_speed_bonus": "Animation speed bonus for pickaxes",
+  "setting-comment-tool_animation_speed_bonus": "Animation speed bonus from mining speed bonus of a pickaxe. Makes higher tier pickaxes swing faster. Value of 0.3 means +30% animation speed for steel piackaxe."
+}
