@@ -17,6 +17,8 @@ public sealed class ToolsAnimationsSystem : ModSystem
     {
         api.RegisterItemClass("ToolsAnimations:Axe", typeof(Axe));
         api.RegisterItemClass("ToolsAnimations:Pickaxe", typeof(Pickaxe));
+
+        api.RegisterBlockBehaviorClass("ToolsAnimations:Splittable", typeof(Splittable));
     }
 
     public override void StartClientSide(ICoreClientAPI api)
