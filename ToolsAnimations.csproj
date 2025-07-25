@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ModName>Tools Animations</ModName>
     <ModType>code</ModType>
-    <ModVersion>1.0.2</ModVersion>
+    <ModVersion>1.1.0</ModVersion>
     <ModId>toolsanimations</ModId>
     <Description></Description>
     <Side>Universal</Side>
@@ -27,7 +27,7 @@
 
   <!-- Project settings -->
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ImplicitUsings>enable</ImplicitUsings>
