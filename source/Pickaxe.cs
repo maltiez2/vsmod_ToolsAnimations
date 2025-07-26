@@ -7,6 +7,7 @@ using CombatOverhaul.MeleeSystems;
 using OpenTK.Mathematics;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
@@ -17,7 +18,7 @@ public class PickaxeStats
     public string ReadyAnimation { get; set; } = "";
     public string IdleAnimation { get; set; } = "";
     public string[] SwingForwardAnimation { get; set; } = Array.Empty<string>();
-    public string SwingBackAnimation { get; set; } = "";
+    public string[] SwingBackAnimation { get; set; } = Array.Empty<string>();
     public string SwingTpAnimation { get; set; } = "";
     public bool RenderingOffset { get; set; } = false;
     public float[] Collider { get; set; } = Array.Empty<float>();
@@ -30,6 +31,14 @@ public class PickaxeStats
     public float AnimationStaggerOnHitDurationMs { get; set; } = 100;
 
     public float AnimationSpeedBonusFromMiningSpeed { get; set; } = 0.3f;
+
+    public bool TwoHanded { get; set; } = false;
+    public float OptimalRange { get; set; } = 4.5f;
+    public float SpeedReductionAtMaxRange { get; set; } = 0.5f;
+
+    public bool DamageOnHit { get; set; } = false;
+    public float ChanceToDamageOnHit { get; set; } = 1f;
+    public float ItemDurabilityFactor { get; set; } = 1f;
 }
 
 public enum PickaxeState
@@ -122,12 +131,14 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     protected const float DefaultMiningSpeed = 4;
     protected const float SteelMiningSpeed = 9;
     protected const float MaxAnimationSpeedBonus = 1.5f;
+    protected const float MaxDistance = 4.5f;
 
     [ActionEventHandler(EnumEntityAction.LeftMouseDown, ActionState.Active)]
     protected virtual bool Swing(ItemSlot slot, EntityPlayer player, ref int state, ActionEventData eventData, bool mainHand, AttackDirection direction)
     {
         if (eventData.AltPressed && !mainHand) return false;
         if (player.BlockSelection?.Block == null || player.EntitySelection?.Entity != null) return false;
+        if (Stats.TwoHanded && !CheckForOtherHandEmpty(mainHand, player)) return false;
         if (ActionRestricted(player, mainHand)) return false;
 
         switch ((PickaxeState)state)
@@ -135,11 +146,13 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
             case PickaxeState.Idle:
                 {
                     float animationSpeedMultiplier = 1;
+                    float miningSpeedFactor = 1;
                     BlockSelection? selection = player.BlockSelection;
                     if (selection?.Position != null)
                     {
                         float miningSpeed = GetMiningSpeed(slot.Itemstack, selection, selection.Block, player);
                         animationSpeedMultiplier = GetAnimationSpeedFromMiningSpeed(miningSpeed, Stats.AnimationSpeedBonusFromMiningSpeed);
+                        miningSpeedFactor = DistanceMiningSpeedReduction(selection, player);
                     }
 
                     int animationsNumber = Stats.SwingForwardAnimation.Length;
@@ -148,11 +161,10 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                     AnimationBehavior?.Play(
                         mainHand,
                         Stats.SwingForwardAnimation[animationIndex],
-                        animationSpeed: PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier,
+                        animationSpeed: (PlayerBehavior?.ManipulationSpeed ?? 1) * animationSpeedMultiplier * miningSpeedFactor,
                         category: AnimationCategory(mainHand),
                         callback: () => SwingForwardAnimationCallback(slot, player, mainHand));
                     TpAnimationBehavior?.Play(mainHand, Stats.SwingForwardAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
-                    //AnimationBehavior?.PlayVanillaAnimation(Stats.SwingTpAnimation, mainHand);
 
                     state = (int)PickaxeState.SwingForward;
 
@@ -177,17 +189,20 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     }
     protected virtual bool SwingForwardAnimationCallback(ItemSlot slot, EntityPlayer player, bool mainHand)
     {
-        BlockSelection selection = player.BlockSelection;
+        BlockSelection? selection = player.BlockSelection;
+
+        int animationsNumber = Stats.SwingBackAnimation.Length;
+        int animationIndex = Rand.Next(0, animationsNumber);
 
         if (selection?.Position == null)
         {
             AnimationBehavior?.Play(
                 mainHand,
-                Stats.SwingBackAnimation,
+                Stats.SwingBackAnimation[animationIndex],
                 animationSpeed: PlayerBehavior?.ManipulationSpeed ?? 1,
                 category: AnimationCategory(mainHand),
                 callback: () => SwingBackAnimationCallback(mainHand));
-            TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
+            TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
             PlayerBehavior?.SetState((int)PickaxeState.SwingBack, mainHand);
             AnimationBehavior?.StopVanillaAnimation(Stats.SwingTpAnimation, mainHand);
             return true;
@@ -198,11 +213,11 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
 
         AnimationBehavior?.Play(
             mainHand,
-            Stats.SwingBackAnimation,
+            Stats.SwingBackAnimation[animationIndex],
             animationSpeed: PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier,
             category: AnimationCategory(mainHand),
             callback: () => SwingBackAnimationCallback(mainHand));
-        TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier);
+        TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier);
         PlayerBehavior?.SetState((int)PickaxeState.SwingBack, mainHand);
         AnimationBehavior?.StopVanillaAnimation(Stats.SwingTpAnimation, mainHand);
 
@@ -213,7 +228,14 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
 
         AnimationBehavior?.SetSpeedModifier(HitImpactFunction);
 
-        BlockBreakingSystem?.DamageBlock(selection, selection.Block, miningSpeed * (float)delta.TotalSeconds, Item.Tool ?? 0, Item.ToolTier);
+        float miningSpeedFactor = DistanceMiningSpeedReduction(selection, player);
+
+        BlockBreakingSystem?.DamageBlock(selection, selection.Block, miningSpeed * (float)delta.TotalSeconds * miningSpeedFactor, Item.Tool ?? 0, Item.ToolTier);
+
+        if (Stats.DamageOnHit && Rand.NextDouble() <= Stats.ChanceToDamageOnHit)
+        {
+            BlockBreakingNetworking.DamageTool(1, mainHand);
+        }
 
         SwingStart = currentTime;
 
@@ -263,6 +285,7 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
         if (eventData.AltPressed && !mainHand) return false;
         if (Stats.AttackAnimation == "") return false;
         if (player.BlockSelection?.Block != null) return false;
+        if (Stats.TwoHanded && !CheckForOtherHandEmpty(mainHand, player)) return false;
         if (ActionRestricted(player, mainHand)) return false;
 
         switch ((PickaxeState)state)
@@ -278,7 +301,6 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                     callback: () => AttackAnimationCallback(mainHand),
                     callbackHandler: code => AttackAnimationCallbackHandler(code, mainHand));
                 TpAnimationBehavior?.Play(mainHand, Stats.AttackAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
-                //AnimationBehavior?.PlayVanillaAnimation(Stats.AttackTpAnimation, mainHand);
 
                 return true;
             default:
@@ -367,6 +389,36 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     {
         return 1f + GameMath.Clamp(bonusMultiplier * (GameMath.Clamp(miningSpeed - DefaultMiningSpeed, 0, miningSpeed) / (SteelMiningSpeed - DefaultMiningSpeed)), 0, MaxAnimationSpeedBonus);
     }
+
+    protected virtual bool CheckForOtherHandEmpty(bool mainHand, EntityPlayer player)
+    {
+        if (mainHand && !player.LeftHandItemSlot.Empty)
+        {
+            (player.World.Api as ICoreClientAPI)?.TriggerIngameError(this, "offhandShouldBeEmpty", Lang.Get("Offhand should be empty"));
+            return false;
+        }
+
+        if (!mainHand && !player.RightHandItemSlot.Empty)
+        {
+            (player.World.Api as ICoreClientAPI)?.TriggerIngameError(this, "mainHandShouldBeEmpty", Lang.Get("Main hand should be empty"));
+            return false;
+        }
+
+        return true;
+    }
+
+    protected virtual float DistanceMiningSpeedReduction(BlockSelection selection, EntityPlayer player)
+    {
+        if (Stats.OptimalRange >= MaxDistance) return 1f;
+
+        float distance = player.Pos.XYZ.Add(player.LocalEyePos).DistanceTo(selection.FullPosition);
+
+        float distanceFraction = GameMath.Clamp(1 - MathF.Max(distance - Stats.OptimalRange, 0) / MathF.Max(MaxDistance - Stats.OptimalRange, 1E-6f), 0, 1);
+
+        float speedFactor = Stats.SpeedReductionAtMaxRange + distanceFraction * MathF.Max(1 - Stats.SpeedReductionAtMaxRange, 0);
+
+        return speedFactor;
+    }
 }
 
 public class Pickaxe : Item, IHasWeaponLogic, ISetsRenderingOffset, IHasIdleAnimations, IOnGameTick, IRestrictAction
@@ -379,6 +431,8 @@ public class Pickaxe : Item, IHasWeaponLogic, ISetsRenderingOffset, IHasIdleAnim
     public AnimationRequestByCode ReadyAnimation { get; private set; }
     public bool RestrictRightHandAction() => Client?.RestrictRightHandAction() ?? false;
     public bool RestrictLeftHandAction() => Client?.RestrictLeftHandAction() ?? false;
+    public bool DamageItemOnBroken { get; private set; } = true;
+    public float DurabilityFactor { get; set; } = 1f;
 
     public float BlockBreakDamage { get; set; } = 0;
 
@@ -386,10 +440,15 @@ public class Pickaxe : Item, IHasWeaponLogic, ISetsRenderingOffset, IHasIdleAnim
     {
         base.OnLoaded(api);
 
+        PickaxeStats Stats = Attributes.AsObject<PickaxeStats>();
+
+        DurabilityFactor = Stats.ItemDurabilityFactor;
+
         if (api is ICoreClientAPI clientAPI)
         {
             Client = new(clientAPI, this);
-            PickaxeStats Stats = Attributes.AsObject<PickaxeStats>();
+            
+            DamageItemOnBroken = !Stats.DamageOnHit;
             RenderingOffset = Stats.RenderingOffset;
 
             IdleAnimation = new(Stats.IdleAnimation, 1, 1, "main", TimeSpan.FromSeconds(0.2), TimeSpan.FromSeconds(0.2), false);
@@ -423,6 +482,29 @@ public class Pickaxe : Item, IHasWeaponLogic, ISetsRenderingOffset, IHasIdleAnim
         base.OnBlockBreaking(player, blockSel, itemslot, remainingResistance, dt, counter);
 
         return result;
+    }
+
+    public override bool OnBlockBrokenWith(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, BlockSelection blockSel, float dropQuantityMultiplier = 1f)
+    {
+        if (DamageItemOnBroken)
+        {
+            return base.OnBlockBrokenWith(world, byEntity, itemslot, blockSel, dropQuantityMultiplier);
+        }
+        
+        EnumItemDamageSource[] previousDamagedBy = DamagedBy;
+        DamagedBy = [];
+
+        bool result = base.OnBlockBrokenWith(world, byEntity, itemslot, blockSel, dropQuantityMultiplier);
+
+        DamagedBy = previousDamagedBy;
+        return result;
+    }
+
+    public override int GetMaxDurability(ItemStack itemstack)
+    {
+        int result = base.GetMaxDurability(itemstack);
+
+        return (int)(result * DurabilityFactor);
     }
 
     public void OnGameTick(ItemSlot slot, EntityPlayer player, ref int state, bool mainHand) => Client?.OnGameTick(slot, player, ref state, mainHand);

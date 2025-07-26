@@ -6,5 +6,15 @@
   "setting-axe_can_split_logs": "Axe can split logs (turn off for compatibility with other mods if necessary)",
   "setting-tool_whoosh_sound": "Tools whoosh sound volume on swing",
   "setting-tool_animation_speed_bonus": "Animation speed bonus for pickaxes",
-  "setting-comment-tool_animation_speed_bonus": "Animation speed bonus from mining speed bonus of a pickaxe. Makes higher tier pickaxes swing faster. Value of 0.3 means +30% animation speed for steel piackaxe."
+  "setting-pickaxe_twohanded": "Pickaxe requires empty off-hand",
+  "setting-axe_twohanded": "Axe requires empty off-hand",
+  "setting-pickaxe_optimal_range": "Pickaxe optimal range",
+  "setting-pickaxe_speed_at_max_range": "Pickaxe mining speed factor at max range",
+  "setting-pickaxe_damage_on_hit": "Damage pickaxe on hit instead of block breaking",
+  "setting-pickaxe_chance_to_damage_on_hit": "Chance to damage pickaxe on hit",
+  "setting-pickaxe_durability_factor": "Pickaxe max durability multiplier",
+
+  "setting-comment-tool_animation_speed_bonus": "Animation speed bonus from mining speed bonus of a pickaxe. Makes higher tier pickaxes swing faster. Value of 0.3 means +30% animation speed for steel piackaxe.",
+  "setting-comment-pickaxe_optimal_range": "Beyond this range mining speed will lineraly reduce to a mining speed at maximum range",
+  "setting-comment-pickaxe_speed_at_max_range": "Mining speed factor at maximum interaction range of 4.5 blocks"
 }

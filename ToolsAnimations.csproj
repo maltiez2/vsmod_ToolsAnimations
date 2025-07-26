@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ModName>Tools Animations</ModName>
     <ModType>code</ModType>
-    <ModVersion>1.1.0</ModVersion>
+    <ModVersion>1.2.0</ModVersion>
     <ModId>toolsanimations</ModId>
     <Description></Description>
     <Side>Universal</Side>

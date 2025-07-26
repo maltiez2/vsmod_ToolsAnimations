@@ -36,6 +36,8 @@ public class AxeStats
     public string AttackAnimation { get; set; } = "";
     public string AttackTpAnimation { get; set; } = "";
     public float AnimationStaggerOnHitDurationMs { get; set; } = 100;
+
+    public bool TwoHanded { get; set; } = false;
 }
 
 public enum AxeState
@@ -134,6 +136,7 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     {
         if (eventData.AltPressed && !mainHand) return false;
         if (player.BlockSelection?.Block == null) return false;
+        if (Stats.TwoHanded && !CheckForOtherHandEmpty(mainHand, player)) return false;
         if (ActionRestricted(player, mainHand)) return false;
 
         switch ((AxeState)state)
@@ -146,7 +149,6 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                         animationSpeed: PlayerBehavior?.ManipulationSpeed ?? 1,
                         category: AnimationCategory(mainHand),
                         callback: () => SwingForwardAnimationCallback(slot, player, mainHand));
-                    //AnimationBehavior?.PlayVanillaAnimation(Stats.SwingTpAnimation, mainHand);
                     TpAnimationBehavior?.Play(mainHand, Stats.SwingForwardAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
 
                     state = (int)AxeState.SwingForward;
@@ -244,6 +246,7 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
         if (eventData.AltPressed && !mainHand) return false;
         if (!Stats.CanSplitLogs) return false;
         if (player.BlockSelection?.Block == null) return false;
+        if (Stats.TwoHanded && !CheckForOtherHandEmpty(mainHand, player)) return false;
         if (!IsSplittable(player.BlockSelection.Block)) return false;
         if (state != (int)AxeState.Idle && state != (int)AxeState.Splitting && state != (int)AxeState.SplittingWindUp) return false;
 
@@ -262,7 +265,6 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                         callback: () => SplitAnimationCallback(slot, player, mainHand),
                         callbackHandler: code => SplitAnimationCallbackHandler(code, mainHand));
                     TpAnimationBehavior?.Play(mainHand, Stats.SplitAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
-                    //AnimationBehavior?.PlayVanillaAnimation(Stats.SplitTpAnimation, mainHand);
 
                     state = (int)AxeState.SplittingWindUp;
 
@@ -334,6 +336,7 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     {
         if (eventData.AltPressed && !mainHand) return false;
         if (player.BlockSelection?.Block != null) return false;
+        if (Stats.TwoHanded && !CheckForOtherHandEmpty(mainHand, player)) return false;
         if (ActionRestricted(player, mainHand)) return false;
 
         switch ((AxeState)state)
@@ -349,7 +352,6 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                     callback: () => AttackAnimationCallback(mainHand),
                     callbackHandler: code => AttackAnimationCallbackHandler(code, mainHand));
                 TpAnimationBehavior?.Play(mainHand, Stats.AttackAnimation, AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
-                //AnimationBehavior?.PlayVanillaAnimation(Stats.AttackTpAnimation, mainHand);
 
                 return true;
             default:
@@ -433,6 +435,22 @@ public class AxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
         {
             return (player.RightHandItemSlot.Itemstack?.Item as IRestrictAction)?.RestrictLeftHandAction() ?? false;
         }
+    }
+    protected virtual bool CheckForOtherHandEmpty(bool mainHand, EntityPlayer player)
+    {
+        if (mainHand && !player.LeftHandItemSlot.Empty)
+        {
+            (player.World.Api as ICoreClientAPI)?.TriggerIngameError(this, "offhandShouldBeEmpty", Lang.Get("Offhand should be empty"));
+            return false;
+        }
+
+        if (!mainHand && !player.RightHandItemSlot.Empty)
+        {
+            (player.World.Api as ICoreClientAPI)?.TriggerIngameError(this, "mainHandShouldBeEmpty", Lang.Get("Main hand should be empty"));
+            return false;
+        }
+
+        return true;
     }
 }
 

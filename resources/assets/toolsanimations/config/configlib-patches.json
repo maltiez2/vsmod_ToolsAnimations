@@ -12,10 +12,13 @@
         "2/value/RenderingOffset": "not(tool_rendering_offset)",
         "0/value/CanSplitLogs": "axe_can_split_logs",
         "2/value/CanSplitLogs": "axe_can_split_logs",
+        "0/value/TwoHanded": "axe_twohanded",
+        "2/value/TwoHanded": "axe_twohanded",
         "-/enabled": "axe_animation"
       },
       "toolsanimations:patches/pickaxe.json": {
-        "0/value/RenderingOffset": "not(tool_rendering_offset)"
+        "0/value/RenderingOffset": "not(tool_rendering_offset)",
+        "0/value/TwoHanded": "pickaxe_twohanded"
       }
     },
     "number": {
@@ -26,6 +29,10 @@
         "pickaxe-swing-forward-1/SoundFrames/0/Volume": "tool_whoosh_sound",
         "pickaxe-swing-forward-2/SoundFrames/0/Volume": "tool_whoosh_sound",
         "pickaxe-swing-forward-3/SoundFrames/0/Volume": "tool_whoosh_sound"
+      },
+      "toolsanimations:patches/pickaxe.json": {
+        "0/value/OptimalRange": "pickaxe_optimal_range",
+        "0/value/SpeedReductionAtMaxRange": "pickaxe_speed_at_max_range"
       }
     }
   },
@@ -46,6 +53,18 @@
       "type": "boolean",
       "ingui": "toolsanimations:setting-pickaxe_animation",
       "default": true
+    },
+    {
+      "code": "axe_twohanded",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-axe_twohanded",
+      "default": false
+    },
+    {
+      "code": "pickaxe_twohanded",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-pickaxe_twohanded",
+      "default": false
     },
     {
       "code": "tool_rendering_offset",
@@ -78,6 +97,54 @@
       "range": {
         "min": 0.0,
         "max": 1.5
+      }
+    },
+    {
+      "code": "pickaxe_optimal_range",
+      "type": "float",
+      "ingui": "toolsanimations:setting-pickaxe_optimal_range",
+      "comment": "toolsanimations:setting-comment-pickaxe_optimal_range",
+      "default": 2.5,
+      "range": {
+        "min": 0.0,
+        "max": 4.5
+      }
+    },
+    {
+      "code": "pickaxe_speed_at_max_range",
+      "type": "float",
+      "ingui": "toolsanimations:setting-pickaxe_speed_at_max_range",
+      "comment": "toolsanimations:setting-comment-pickaxe_speed_at_max_range",
+      "default": 0.5,
+      "range": {
+        "min": 0.0,
+        "max": 1.0
+      }
+    },
+    {
+      "code": "pickaxe_damage_on_hit",
+      "type": "boolean",
+      "ingui": "toolsanimations:setting-pickaxe_damage_on_hit",
+      "default": false
+    },
+    {
+      "code": "pickaxe_chance_to_damage_on_hit",
+      "type": "float",
+      "ingui": "toolsanimations:setting-pickaxe_chance_to_damage_on_hit",
+      "default": 0.5,
+      "range": {
+        "min": 0.0,
+        "max": 1.0
+      }
+    },
+    {
+      "code": "pickaxe_durability_factor",
+      "type": "float",
+      "ingui": "toolsanimations:setting-pickaxe_durability_factor",
+      "default": 1,
+      "range": {
+        "min": 0.1,
+        "max": 10.0
       }
     }
   ]

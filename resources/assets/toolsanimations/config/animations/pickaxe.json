@@ -179,6 +179,93 @@
     "ItemAnimationStart": 0,
     "ItemAnimationEnd": 0
   },
+  "pickaxe-swing-back-1": {
+    "Hold": false,
+    "PlayerKeyFrames": [
+      {
+        "EasingTime": 450,
+        "EasingFunction": "Sin",
+        "DetachedAnchor": false,
+        "SwitchArms": false,
+        "PitchFollow": true,
+        "PitchDontFollow": false,
+        "FOVMultiplier": 1,
+        "BobbingAmplitude": 0.8,
+        "Elements": {
+          "ItemAnchor": [-3.3, 1.3, 0, 0, 0, -12],
+          "LowerArmR": [0, 0, 0, 0, -16, -68],
+          "UpperArmR": [2, 0, 0, -17, -16, -97.2],
+          "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+          "LowerArmL": [0, 0, 0, 0, 0, 0],
+          "UpperArmL": [2, 0, 0, -38, -22, -144]
+        }
+      }
+    ],
+    "ItemKeyFrames": [],
+    "SoundFrames": [],
+    "ParticlesFrames": [],
+    "CallbackFrames": [],
+    "ItemAnimationStart": 0,
+    "ItemAnimationEnd": 0
+  },
+  "pickaxe-swing-back-2": {
+    "Hold": false,
+    "PlayerKeyFrames": [
+      {
+        "EasingTime": 450,
+        "EasingFunction": "Sin",
+        "DetachedAnchor": false,
+        "SwitchArms": false,
+        "PitchFollow": true,
+        "PitchDontFollow": false,
+        "FOVMultiplier": 1,
+        "BobbingAmplitude": 0.8,
+        "Elements": {
+          "ItemAnchor": [-3.3, 1.3, 0, 0, -8, -5],
+          "LowerArmR": [0, 0, 0, 0, -16, -68],
+          "UpperArmR": [2, 0, 0, -17, -2, -97.2],
+          "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+          "LowerArmL": [0, 0, 0, 0, 0, 0],
+          "UpperArmL": [2, 0, 0, -45, -8, -137]
+        }
+      }
+    ],
+    "ItemKeyFrames": [],
+    "SoundFrames": [],
+    "ParticlesFrames": [],
+    "CallbackFrames": [],
+    "ItemAnimationStart": 0,
+    "ItemAnimationEnd": 0
+  },
+  "pickaxe-swing-back-3": {
+    "Hold": false,
+    "PlayerKeyFrames": [
+      {
+        "EasingTime": 450,
+        "EasingFunction": "Sin",
+        "DetachedAnchor": false,
+        "SwitchArms": false,
+        "PitchFollow": true,
+        "PitchDontFollow": false,
+        "FOVMultiplier": 1,
+        "BobbingAmplitude": 0.8,
+        "Elements": {
+          "ItemAnchor": [-3.3, 1.3, 0, 0, 1, 15],
+          "LowerArmR": [0, 0, 0, 0, -16, -60],
+          "UpperArmR": [2, 0, 0, -4, -11, -104.2],
+          "ItemAnchorL": [0, 0, 0, 0, 0, 0],
+          "LowerArmL": [0, 0, 0, 0, 0, 0],
+          "UpperArmL": [2, 0, 0, -34, -12, -141]
+        }
+      }
+    ],
+    "ItemKeyFrames": [],
+    "SoundFrames": [],
+    "ParticlesFrames": [],
+    "CallbackFrames": [],
+    "ItemAnimationStart": 0,
+    "ItemAnimationEnd": 0
+  },
   "pickaxe-attack": {
     "Hold": false,
     "PlayerKeyFrames": [

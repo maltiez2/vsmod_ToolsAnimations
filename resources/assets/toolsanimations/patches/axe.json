@@ -35,9 +35,10 @@
         ]
       },
       "AttackAnimation": "combatoverhaul:axe-attack",
-      "AttackTpAnimation": "falx"
-    },
-    "HandleLMBInputs": true
+      "AttackTpAnimation": "falx",
+      "HandleLMBInputs": true,
+      "TwoHanded": false
+    }
   },
   {"enabled": true, "file": "game:itemtypes/tool/axe-stone", "op": "replace", "path": "/class", "value": "ToolsAnimations:Axe"},
   {
@@ -79,7 +80,8 @@
       },
       "AttackAnimation": "combatoverhaul:axe-attack",
       "AttackTpAnimation": "falx",
-      "HandleLMBInputs": true
+      "HandleLMBInputs": true,
+      "TwoHanded": false
     }
   },
   {"enabled": true, "file": "game:itemtypes/tool/axe-metal", "op": "remove", "path": "/class"},

@@ -319,6 +319,13 @@ public class BlockSplitPacket
     public BlockSplitPacket() { }
 }
 
+[ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+public class ToolDamagedPacket
+{
+    public int DurabilityDamage { get; set; } = 1;
+    public bool MainHand { get; set; } = true;
+}
+
 public class BlockBreakingSystemClient
 {
     public const string NetworkChannelId = "CombatOverhaul:blockBreaking";
@@ -327,12 +334,18 @@ public class BlockBreakingSystemClient
     {
         _api = api;
         _channel = api.Network.RegisterChannel(NetworkChannelId)
-            .RegisterMessageType<BlockSplitPacket>();
+            .RegisterMessageType<BlockSplitPacket>()
+            .RegisterMessageType<ToolDamagedPacket>();
     }
 
     public void SplitBlock()
     {
         _channel.SendPacket(new BlockSplitPacket());
+    }
+
+    public void DamageTool(int durabilityDamage, bool mainHand)
+    {
+        _channel.SendPacket(new ToolDamagedPacket() { DurabilityDamage = durabilityDamage , MainHand = mainHand });
     }
 
     private readonly ICoreClientAPI _api;
@@ -348,12 +361,21 @@ public class BlockBreakingSystemServer
         _api = api;
         api.Network.RegisterChannel(NetworkChannelId)
             .RegisterMessageType<BlockSplitPacket>()
-            .SetMessageHandler<BlockSplitPacket>(PacketHandler);
+            .RegisterMessageType<ToolDamagedPacket>()
+            .SetMessageHandler<BlockSplitPacket>(SplitPacketHandler)
+            .SetMessageHandler<ToolDamagedPacket>(ToolDamagePacketHandler);
     }
 
     private readonly ICoreServerAPI _api;
 
-    private void PacketHandler(IServerPlayer player, BlockSplitPacket packet)
+    private void ToolDamagePacketHandler(IServerPlayer player, ToolDamagedPacket packet)
+    {
+        ItemSlot slot = packet.MainHand ? player.Entity.RightHandItemSlot : player.Entity.LeftHandItemSlot;
+
+        slot.Itemstack?.Item?.DamageItem(player.Entity.World, player.Entity, slot, packet.DurabilityDamage);
+    }
+
+    private void SplitPacketHandler(IServerPlayer player, BlockSplitPacket packet)
     {
         BlockSelection selection = player.Entity.BlockSelection;
 
