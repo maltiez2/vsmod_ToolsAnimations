@@ -5,6 +5,7 @@ using CombatOverhaul.Implementations;
 using CombatOverhaul.Inputs;
 using CombatOverhaul.MeleeSystems;
 using OpenTK.Mathematics;
+using System.Diagnostics;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -518,6 +519,8 @@ public class Axe : ItemAxe, IHasWeaponLogic, ISetsRenderingOffset, IHasIdleAnima
     {
         float result = GameMath.Clamp(remainingResistance - BlockBreakDamage, 0, remainingResistance);
         BlockBreakDamage = 0;
+
+        Debug.WriteLine($"OnBlockBreaking - remainingResistance: {remainingResistance},\tBlockBreakDamage: {BlockBreakDamage},\tresult: {result}");
 
         base.OnBlockBreaking(player, blockSel, itemslot, remainingResistance, dt, counter);
 

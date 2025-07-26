@@ -3,7 +3,7 @@
     "Hold": true,
     "PlayerKeyFrames": [
       {
-        "EasingTime": 300,
+        "EasingTime": 600,
         "EasingFunction": "Sin",
         "DetachedAnchor": false,
         "SwitchArms": false,
@@ -32,7 +32,7 @@
     "Hold": true,
     "PlayerKeyFrames": [
       {
-        "EasingTime": 300,
+        "EasingTime": 600,
         "EasingFunction": "Sin",
         "DetachedAnchor": false,
         "SwitchArms": false,
@@ -284,7 +284,7 @@
     "Hold": true,
     "PlayerKeyFrames": [
       {
-        "EasingTime": 300,
+        "EasingTime": 600,
         "EasingFunction": "Sin",
         "DetachedAnchor": false,
         "SwitchArms": false,
@@ -313,7 +313,7 @@
     "Hold": true,
     "PlayerKeyFrames": [
       {
-        "EasingTime": 300,
+        "EasingTime": 600,
         "EasingFunction": "Sin",
         "DetachedAnchor": false,
         "SwitchArms": false,

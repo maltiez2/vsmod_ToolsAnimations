@@ -30,19 +30,19 @@ public sealed class BlockBreakingController
     private readonly ICoreClientAPI _api;
     private BlockDamage? _curBlockDmg;
     private readonly ClientMain _game;
-    private int _survivalBreakingCounter;
 
     private static readonly FieldInfo? _clientMain_damagedBlocks = typeof(ClientMain).GetField("damagedBlocks", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private static readonly MethodInfo? _clientMain_OnPlayerTryDestroyBlock = typeof(ClientMain).GetMethod("OnPlayerTryDestroyBlock", BindingFlags.Public | BindingFlags.Instance);
     private static readonly MethodInfo? _clientMain_loadOrCreateBlockDamage = typeof(ClientMain).GetMethod("loadOrCreateBlockDamage", BindingFlags.Public | BindingFlags.Instance);
-    private static readonly MethodInfo? _clientMain_UpdateCurrentSelection = typeof(ClientMain).GetMethod("UpdateCurrentSelection", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private readonly Dictionary<BlockPos, BlockDamage> _damagedBlocks;
 
-    private void OnPlayerTryDestroyBlock(BlockSelection blockSelection) => _clientMain_OnPlayerTryDestroyBlock?.Invoke(_game, new object[] { blockSelection });
-    private BlockDamage loadOrCreateBlockDamage(BlockSelection blockSelection, Block block, EnumTool? tool, IPlayer byPlayer) => (BlockDamage?)_clientMain_loadOrCreateBlockDamage?.Invoke(_game, new object[] { blockSelection, block, tool, byPlayer }) ?? throw new Exception();
-    private void UpdateCurrentSelection() => _clientMain_UpdateCurrentSelection?.Invoke(_game, Array.Empty<object>());
+    private const int _treeResistanceThreshold = 300;
+    private const int _treeResistanceDivider = 3;
+
+    private void OnPlayerTryDestroyBlock(BlockSelection blockSelection) => _clientMain_OnPlayerTryDestroyBlock?.Invoke(_game, [blockSelection]);
+    private BlockDamage loadOrCreateBlockDamage(BlockSelection blockSelection, Block block, EnumTool? tool, IPlayer byPlayer) => (BlockDamage?)_clientMain_loadOrCreateBlockDamage?.Invoke(_game, [blockSelection, block, tool, byPlayer]) ?? throw new Exception();
 
     private void InitBlockBreakSurvival(BlockSelection blockSelection)
     {
@@ -70,6 +70,7 @@ public sealed class BlockBreakingController
         if (tool == EnumTool.Axe)
         {
             FindTree(_api.World, blockSelection.Position, out int resistance, out int woodTier);
+            resistance = AdjustTreeResistance(resistance);
             if (resistance > 0)
             {
                 if (ToolTier < woodTier - 3)
@@ -86,45 +87,6 @@ public sealed class BlockBreakingController
         _curBlockDmg.RemainingResistance -= blockDamage;
 
 
-        _survivalBreakingCounter++;
-        _curBlockDmg.Facing = blockSelection.Face;
-        if (_curBlockDmg.Position != blockSelection.Position || _curBlockDmg.Block != block)
-        {
-            _curBlockDmg.RemainingResistance = block.GetResistance(_game.BlockAccessor, blockSelection.Position);
-            _curBlockDmg.Block = block;
-            _curBlockDmg.Position = blockSelection.Position;
-        }
-        if (_curBlockDmg.RemainingResistance <= 0f)
-        {
-            _game.eventManager.TriggerBlockBroken(_curBlockDmg);
-            OnPlayerTryDestroyBlock(blockSelection);
-            _damagedBlocks.Remove(blockSelection.Position);
-            //UpdateCurrentSelection();
-        }
-        else
-        {
-            _game.eventManager.TriggerBlockBreaking(_curBlockDmg);
-        }
-        _curBlockDmg.LastBreakEllapsedMs = elapsedMs;
-    }
-
-    private void ContinueBreakSurvival(BlockSelection blockSelection, Block block)
-    {
-        LoadOrCreateBlockDamage(blockSelection, block);
-        long elapsedMs = _game.ElapsedMilliseconds;
-        int diff = (int)(elapsedMs - _curBlockDmg.LastBreakEllapsedMs);
-        long decorBreakPoint = _curBlockDmg.BeginBreakEllapsedMs + 225;
-        if (elapsedMs >= decorBreakPoint && _curBlockDmg.LastBreakEllapsedMs < decorBreakPoint && _game.BlockAccessor.GetChunkAtBlockPos(blockSelection.Position) is WorldChunk c)
-        {
-            BlockPos pos = blockSelection.Position;
-            int chunksize = 32;
-            c.BreakDecor(_game, pos, blockSelection.Face);
-            _game.WorldMap.MarkChunkDirty(pos.X / chunksize, pos.Y / chunksize, pos.Z / chunksize, priority: true);
-            _game.SendPacketClient(ClientPackets.BlockInteraction(blockSelection, 2, 0));
-        }
-        //_curBlockDmg.RemainingResistance = block.OnGettingBroken(_api.World.Player, blockSelection, _api.World.Player.Entity.ActiveHandItemSlot, _curBlockDmg.RemainingResistance, (float)diff / 1000f, _survivalBreakingCounter);
-        _curBlockDmg.RemainingResistance = _api.World.Player.Entity.ActiveHandItemSlot.Itemstack.Collectible.OnBlockBreaking(_api.World.Player, blockSelection, _api.World.Player.Entity.ActiveHandItemSlot, _curBlockDmg.RemainingResistance, diff / 1000f, _survivalBreakingCounter);
-        _survivalBreakingCounter++;
         _curBlockDmg.Facing = blockSelection.Face;
         if (_curBlockDmg.Position != blockSelection.Position || _curBlockDmg.Block != block)
         {
@@ -262,6 +224,13 @@ public sealed class BlockBreakingController
         return stack;
     }
 
+    private int AdjustTreeResistance(int resistance)
+    {
+        if (resistance <= _treeResistanceThreshold) return resistance;
+
+        return _treeResistanceThreshold + (resistance - _treeResistanceThreshold) / _treeResistanceDivider;
+    }
+
     private static void onTreeBlock(Vec4i pos, IBlockAccessor blockAccessor, HashSet<BlockPos> checkedPositions, BlockPos startPos, bool chopSpreadVertical, string treeFellingGroupCode, Queue<Vec4i> queue, Queue<Vec4i> leafqueue, int[] adjacentLeaves)
     {
         for (int i = 0; i < Vec3i.DirectAndIndirectNeighbours.Length; i++)
@@ -345,7 +314,7 @@ public class BlockBreakingSystemClient
 
     public void DamageTool(int durabilityDamage, bool mainHand)
     {
-        _channel.SendPacket(new ToolDamagedPacket() { DurabilityDamage = durabilityDamage , MainHand = mainHand });
+        _channel.SendPacket(new ToolDamagedPacket() { DurabilityDamage = durabilityDamage, MainHand = mainHand });
     }
 
     private readonly ICoreClientAPI _api;

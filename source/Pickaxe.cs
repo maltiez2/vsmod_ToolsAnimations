@@ -127,6 +127,8 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     protected readonly TimeSpan MaxDelta = TimeSpan.FromSeconds(0.1);
     protected readonly MeleeAttack MeleeAttack;
     protected readonly Random Rand = new();
+    protected int AnimationIndexCounter = 0;
+    protected int CurrentAnimationIndex = 0;
 
     protected const float DefaultMiningSpeed = 4;
     protected const float SteelMiningSpeed = 9;
@@ -156,15 +158,15 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
                     }
 
                     int animationsNumber = Stats.SwingForwardAnimation.Length;
-                    int animationIndex = Rand.Next(0, animationsNumber);
+                    CurrentAnimationIndex = GetAnimationIndex(animationsNumber);
 
                     AnimationBehavior?.Play(
                         mainHand,
-                        Stats.SwingForwardAnimation[animationIndex],
+                        Stats.SwingForwardAnimation[CurrentAnimationIndex],
                         animationSpeed: (PlayerBehavior?.ManipulationSpeed ?? 1) * animationSpeedMultiplier * miningSpeedFactor,
                         category: AnimationCategory(mainHand),
                         callback: () => SwingForwardAnimationCallback(slot, player, mainHand));
-                    TpAnimationBehavior?.Play(mainHand, Stats.SwingForwardAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
+                    TpAnimationBehavior?.Play(mainHand, Stats.SwingForwardAnimation[CurrentAnimationIndex], AnimationCategory(mainHand), (PlayerBehavior?.ManipulationSpeed ?? 1) * animationSpeedMultiplier * miningSpeedFactor);
 
                     state = (int)PickaxeState.SwingForward;
 
@@ -191,18 +193,15 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
     {
         BlockSelection? selection = player.BlockSelection;
 
-        int animationsNumber = Stats.SwingBackAnimation.Length;
-        int animationIndex = Rand.Next(0, animationsNumber);
-
         if (selection?.Position == null)
         {
             AnimationBehavior?.Play(
                 mainHand,
-                Stats.SwingBackAnimation[animationIndex],
+                Stats.SwingBackAnimation[CurrentAnimationIndex],
                 animationSpeed: PlayerBehavior?.ManipulationSpeed ?? 1,
                 category: AnimationCategory(mainHand),
                 callback: () => SwingBackAnimationCallback(mainHand));
-            TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
+            TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[CurrentAnimationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed ?? 1);
             PlayerBehavior?.SetState((int)PickaxeState.SwingBack, mainHand);
             AnimationBehavior?.StopVanillaAnimation(Stats.SwingTpAnimation, mainHand);
             return true;
@@ -213,11 +212,11 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
 
         AnimationBehavior?.Play(
             mainHand,
-            Stats.SwingBackAnimation[animationIndex],
+            Stats.SwingBackAnimation[CurrentAnimationIndex],
             animationSpeed: PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier,
             category: AnimationCategory(mainHand),
             callback: () => SwingBackAnimationCallback(mainHand));
-        TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[animationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier);
+        TpAnimationBehavior?.Play(mainHand, Stats.SwingBackAnimation[CurrentAnimationIndex], AnimationCategory(mainHand), PlayerBehavior?.ManipulationSpeed * animationSpeedMultiplier ?? animationSpeedMultiplier);
         PlayerBehavior?.SetState((int)PickaxeState.SwingBack, mainHand);
         AnimationBehavior?.StopVanillaAnimation(Stats.SwingTpAnimation, mainHand);
 
@@ -418,6 +417,15 @@ public class PickaxeClient : IClientWeaponLogic, IOnGameTick, IRestrictAction
         float speedFactor = Stats.SpeedReductionAtMaxRange + distanceFraction * MathF.Max(1 - Stats.SpeedReductionAtMaxRange, 0);
 
         return speedFactor;
+    }
+
+    protected virtual int GetAnimationIndex(int animationsCount)
+    {
+        if (AnimationIndexCounter >= int.MaxValue) AnimationIndexCounter = 0;
+
+        AnimationIndexCounter++;
+
+        return AnimationIndexCounter % animationsCount;
     }
 }
 
