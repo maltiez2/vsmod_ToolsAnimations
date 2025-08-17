@@ -12,5 +12,9 @@
     "op": "add",
     "path": "/behaviors/-",
     "value": {"name": "ToolsAnimations:Splittable", "properties": {"DroppedItem": {"Type": "Item", "Code": "firewood", "StackSize": 4}}}
-  }
+  },
+  {"side": "Server", "enabled": true, "file": "game:itemtypes/tool/blade", "op": "move", "frompath": "/attackRangebytype/*", "path": "/move-temp"},
+  {"side": "Server", "enabled": true, "file": "game:itemtypes/tool/blade", "op": "add", "path": "/attackRangebytype/*-blackguard-*", "value": 3},
+  {"side": "Server", "enabled": true, "file": "game:itemtypes/tool/blade", "op": "add", "path": "/attackRangebytype/*-forlorn-*", "value": 3},
+  {"side": "Server", "enabled": true, "file": "game:itemtypes/tool/blade", "op": "move", "frompath": "/move-temp", "path": "/attackRangebytype/*"}
 ]
