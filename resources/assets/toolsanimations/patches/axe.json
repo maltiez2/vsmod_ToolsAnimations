@@ -34,7 +34,7 @@
           }
         ]
       },
-      "AttackAnimation": "combatoverhaul:axe-attack",
+      "AttackAnimation": "toolsanimations:axe-attack",
       "AttackTpAnimation": "falx",
       "HandleLMBInputs": true,
       "TwoHanded": false
@@ -78,7 +78,7 @@
           }
         ]
       },
-      "AttackAnimation": "combatoverhaul:axe-attack",
+      "AttackAnimation": "toolsanimations:axe-attack",
       "AttackTpAnimation": "falx",
       "HandleLMBInputs": true,
       "TwoHanded": false
